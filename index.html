@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sajjad Baloch AI Assistant - Multimodal</title>
+  <style>
+    /* Unique & Futuristic Glassmorphism Dark Theme Design - Sajjad Baloch */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    
+    :root {
+      --bg-color: #0d1117;
+      --panel-bg: rgba(22, 27, 34, 0.95);
+      --msg-bot-bg: rgba(13, 17, 23, 0.7);
+      --msg-user-bg: rgba(110, 64, 201, 1);
+      --accent-color: #7957d5;
+      --accent-gradient: linear-gradient(135deg, #7957d5 0%, #10a37f 100%);
+      --owner-accent: #10a37f;
+      --text-color: #e6edf3;
+      --text-muted: #8b949e;
+      --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      opacity: 0;
+      animation: fadeIn 1.2s ease-out forwards;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 163, 127, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(16, 163, 127, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 163, 127, 0); } }
+    @keyframes glowViolet { 0%, 100% { box-shadow: 0 0 5px rgba(121, 87, 213, 0.5); } 50% { box-shadow: 0 0 20px rgba(121, 87, 213, 0.8); } }
+
+    /* Unique Glass Header */
+    .chat-header {
+      padding: 15px 25px;
+      background: rgba(22, 27, 34, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-align: center;
+      border-bottom: var(--glass-border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10;
+    }
+    
+    .chat-header .title-group { display: flex; align-items: center; gap: 8px; }
+    .chat-header h1 { font-size: 1.4rem; color: #fff; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .chat-header .badge { background: rgba(16, 163, 127, 0.15); color: var(--owner-accent); border: 1px solid rgba(16, 163, 127, 0.3); padding: 3px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+    .chat-header p { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .chat-header p .owner-name { color: var(--owner-accent); font-weight: bold; }
+    .chat-header p .owner-status-icon { color: var(--owner-accent); font-size: 0.8rem; }
+
+    /* Unique Glass Chat Container */
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+    
+    .message {
+      max-width: 80%;
+      padding: 14px 18px;
+      border-radius: 18px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      opacity: 0;
+      animation: slideInUp 0.5s ease-out forwards;
+      background: var(--panel-bg);
+      border: var(--glass-border);
+    }
+    
+    .user-message {
+      align-self: flex-end;
+      background: var(--msg-user-bg);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      animation: slideInUp 0.5s ease-out forwards;
+    }
+    
+    .bot-message {
+      align-self: flex-start;
+      background: var(--msg-bot-bg);
+      color: var(--text-color);
+      border-bottom-left-radius: 4px;
+      animation: slideInUp 0.6s ease-out forwards;
+    }
+    
+    /* Subtle Pulse Animation for First Bot Message */
+    .bot-message.pulse-in { animation: slideInUp 0.6s ease-out forwards, glowViolet 2s infinite ease-in-out; }
+    
+    .media-preview { max-width: 100%; border-radius: 12px; margin-top: 10px; border: var(--glass-border); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+    /* Unique Glass Input Container */
+    .input-container {
+      padding: 20px 25px;
+      background: rgba(22, 27, 34, 0.7);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: center;
+      border-top: var(--glass-border);
+    }
+    
+    .input-box {
+      width: 100%;
+      max-width: 950px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(13, 17, 23, 0.5);
+      padding: 15px;
+      border-radius: 24px;
+      border: var(--glass-border);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    }
+    
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: var(--glass-border);
+    }
+    
+    .mode-btn {
+      background: rgba(48, 54, 61, 0.4);
+      color: var(--text-muted);
+      border: var(--glass-border);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .mode-btn:hover { background: rgba(48, 54, 61, 0.7); color: #fff; transform: translateY(-2px); }
+    .mode-btn.active {
+      background: var(--accent-gradient);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 10px rgba(121, 87, 213, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .text-area-box {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    input[type="text"] {
+      flex: 1;
+      background: rgba(13, 17, 23, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #fff;
+      outline: none;
+      font-size: 1rem;
+      padding: 12px 18px;
+      border-radius: 20px;
+      transition: border-color 0.3s;
+    }
+    
+    input[type="text"]:focus { border-color: rgba(121, 87, 213, 0.5); }
+    
+    button.send-btn {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(121, 87, 213, 0.2);
+    }
+    
+    button.send-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 6px 15px rgba(121, 87, 213, 0.4); }
+    button.send-btn:active { transform: translateY(1px) scale(0.98); }
+    
+    /* Footer branding unique */
+    .footer-info {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .footer-info .owner-tag-group { display: flex; align-items: center; gap: 4px; }
+    .footer-info span.owner-tag { color: var(--owner-accent); font-weight: bold; }
+    
+    /* Active Mode Highlighting Pulse */
+    #currentModeLabel.pulse-active { color: var(--accent-color); font-weight: bold; animation: pulse 1.5s infinite; padding: 1px 6px; border-radius: 5px; background: rgba(121, 87, 213, 0.1); }
+  </style>
+</head>
+<body>
+
+  <!-- Unique Header Section -->
+  <div class="chat-header">
+    <div class="title-group">
+      <h1>Multimodal AI Assistant</h1>
+      <span class="badge">Official Agent</span>
+    </div>
+    <p>
+      <span>Developed & Owned by</span>
+      <span class="owner-name">Sajjad Baloch</span>
+      <span class="owner-status-icon">✓</span>
+    </p>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <!-- Welcome message with unique pulse animation -->
+    <div class="message bot-message pulse-in">Hello! Main Sajjad Baloch ka banaya hua Multimodal AI Assistant hoon. Text, Image, Video ya Voice mode select karein aur command dein! (Ling 3.0 Flash VL Model)</div>
+  </div>
+
+  <div class="input-container">
+    <div class="input-box">
+      <div class="mode-selector">
+        <button class="mode-btn active" onclick="setMode('chat', this)">💬 Chat</button>
+        <button class="mode-btn" onclick="setMode('image', this)">📷 Image</button>
+        <button class="mode-btn" onclick="setMode('video', this)">🎥 Video</button>
+        <button class="mode-btn" onclick="setMode('voice', this)">🎙️ Voice Speak</button>
+      </div>
+      <div class="text-area-box">
+        <input type="text" id="userInput" placeholder="Ask something or describe an image/video..." onkeydown="if(event.key==='Enter') processRequest()">
+        <button class="send-btn" id="sendBtn" onclick="processRequest()">Send</button>
+      </div>
+      
+      <!-- Footer Info -->
+      <div class="footer-info">
+        <div class="owner-tag-group">
+          Owner: <span class="owner-tag">Sajjad Baloch</span>
+        </div>
+        <span>|</span>
+        <span>Mode: <span id="currentModeLabel" class="pulse-active">CHAT</span></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = "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";
+    let currentMode = 'chat';
+
+    function setMode(mode, btn) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const modeLabel = document.getElementById('currentModeLabel');
+      modeLabel.innerText = mode.toUpperCase();
+      
+      // Mode switch par refresh animation
+      modeLabel.style.animation = 'none';
+      setTimeout(() => modeLabel.style.animation = '', 10);
+    }
+
+    async function processRequest() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(`[${currentMode.toUpperCase()}] ${text}`, 'user-message');
+      input.value = '';
+
+      if (currentMode === 'chat') {
+        await handleChat(text);
+      } else if (currentMode === 'image') {
+        handleImage(text);
+      } else if (currentMode === 'video') {
+        await handleVideo(text);
+      } else if (currentMode === 'voice') {
+        await handleVoice(text);
+      }
+    }
+
+    // 1. Text Chat (InclusionAI / OpenRouter)
+    async function handleChat(text) {
+      const loading = appendMessage('Thinking...', 'bot-message');
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            "model": "inclusionai/ling-3.0-flash-vl:free",
+            "messages": [{ "role": "user", "content": text }]
+          })
+        });
+        const data = await response.json();
+        
+        // Remove 'Thinking' text and add content with typing animation feel
+        loading.innerText = '';
+        const content = data.choices ? data.choices[0].message.content : "Error in response.";
+        typeOutContent(loading, content);
+        
+      } catch (e) { loading.innerText = "Connection Error."; }
+    }
+
+    // Typing emulation effect (client-side only for feeling)
+    function typeOutContent(container, content) {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < content.length) {
+          container.innerText += content.charAt(i);
+          i++;
+          // Smoothly scroll as text types
+          const chatContainer = document.getElementById('chatContainer');
+          if (chatContainer.scrollTop + chatContainer.clientHeight >= chatContainer.scrollHeight - 50) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          }
+        } else {
+          clearInterval(interval);
+        }
+      }, 10); // Adjust speed here
+    }
+
+    // 2. Image Generation
+    function handleImage(prompt) {
+      const loading = appendMessage('Generating unique image...', 'bot-message');
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=450&nologo=true`;
+      loading.innerHTML = `<div>Here is your image based on "${prompt}":</div><img class="media-preview" src="${imageUrl}" alt="AI Image Sajjad Baloch">`;
+    }
+
+    // 3. Video Search
+    async function handleVideo(query) {
+      const loading = appendMessage('Searching video assets...', 'bot-message');
+      try {
+        const res = await fetch(`https://pixabay.com/api/videos/?key=39898031-6e3e56c3ee1c7fbf53f0b0162&q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (data.hits && data.hits.length > 0) {
+          const videoUrl = data.hits[0].videos.small.url;
+          loading.innerHTML = `<div>Found visual matching "${query}":</div><video class="media-preview" controls src="${videoUrl}"></video>`;
+        } else {
+          loading.innerText = `No videos found for "${query}". Try another topic.`;
+        }
+      } catch(e) { loading.innerText = "Error fetching video visual."; }
+    }
+
+    // 4. Voice Text-to-Speech
+    async function handleVoice(text) {
+      const loading = appendMessage('Generating voice response...', 'bot-message');
+      await handleChat(text);
+      
+      // Jab content type ho jaye, tab speak
+      if ('speechSynthesis' in window) {
+        // Voice selection can be added here
+        const utterance = new SpeechSynthesisUtterance(loading.innerText);
+        // utterance.lang = 'hi-IN'; // Can try Hindi/Urdu voice if available on system
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function appendMessage(text, className) {
+      const div = document.createElement('div');
+      div.classList.add('message', className);
+      div.innerText = text;
+      const chatContainer = document.getElementById('chatContainer');
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return div;
+    }
+  </script>
+</body>
+</html>
